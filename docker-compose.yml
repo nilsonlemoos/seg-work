@@ -1,0 +1,14 @@
+services:
+  v1-insecure:
+    build: ./v1-insecure
+    ports:
+      - "5000:5000"
+    container_name: seg-v1-insecure
+
+  v2-secure:
+    build: ./v2-secure
+    ports:
+      - "5001:5001"
+    environment:
+      - SECRET_KEY=clave-segura-generada-para-demo
+    container_name: seg-v2-secure
