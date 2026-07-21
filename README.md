@@ -63,3 +63,4 @@ seg-work/
 | 8 | Debug mode activo | A05 | ❌ `debug=True` | ✅ `debug=False` |
 
 Ver `report/informe_tecnico.md` para el análisis técnico completo.
+# seg-work
