@@ -12,3 +12,11 @@ services:
     environment:
       - SECRET_KEY=clave-segura-generada-para-demo
     container_name: seg-v2-secure
+
+  unificada:
+    build: ./unificada
+    ports:
+      - "5002:5002"
+    environment:
+      - SECRET_KEY=clave-demo-unificada
+    container_name: seg-unificada
