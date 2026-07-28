@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{% set mode = session.get('mode', 'inseguro') %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>
+        Dashboard
+        <small class="text-muted fs-6">
+            (modo {{ mode }})
+            {% if user %} &mdash; Hola, <strong>{{ user }}</strong>{% endif %}
+        </small>
+    </h4>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">Subir archivo</div>
+    <div class="card-body">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="input-group">
+                <input type="file" name="file" id="fileInput" class="form-control"
+                       {% if mode == 'seguro' %}accept=".pdf,.png,.jpg,.jpeg,.gif,.txt,.docx"{% endif %}>
+                <button type="submit" class="btn btn-primary">Subir</button>
+            </div>
+            <small class="text-muted">
+                {% if mode == 'seguro' %}
+                    Tipos permitidos: PDF, PNG, JPG, GIF, TXT, DOCX. Maximo 5 MB.
+                {% else %}
+                    Se acepta cualquier tipo de archivo y tamano.
+                {% endif %}
+            </small>
+        </form>
+        <div id="uploadMsg" class="mt-2"></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        {% if mode == 'seguro' %}Mis archivos{% else %}Archivos en el sistema (todos los usuarios){% endif %}
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    {% if mode == 'inseguro' %}<th>Propietario</th>{% endif %}
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in files %}
+            <tr>
+                <td>{{ f.id }}</td>
+                <td>{{ f.original_name }}</td>
+                {% if mode == 'inseguro' %}<td>{{ f.owner_id }}</td>{% endif %}
+                <td>
+                    <a href="/files/{{ f.id }}" class="btn btn-sm btn-outline-primary">Descargar</a>
+                    <button onclick="renameFile({{ f.id }})" class="btn btn-sm btn-outline-warning">Renombrar</button>
+                    <button onclick="deleteFile({{ f.id }})" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="{% if mode == 'seguro' %}3{% else %}4{% endif %}" class="text-center text-muted py-3">
+                    {% if mode == 'seguro' %}No tienes archivos subidos.{% else %}No hay archivos en el sistema.{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById("uploadForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById("fileInput");
+    if (!fileInput.files[0]) {
+        document.getElementById("uploadMsg").innerHTML =
+            '<div class="alert alert-warning">Selecciona un archivo.</div>';
+        return;
+    }
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    const res = await fetch("/files/upload", { method: "POST", body: formData });
+    const data = await res.json();
+    const cls = res.ok ? "success" : "danger";
+    document.getElementById("uploadMsg").innerHTML =
+        `<div class="alert alert-${cls}">${data.message || data.error}</div>`;
+    if (res.ok) setTimeout(() => location.reload(), 1000);
+});
+
+async function deleteFile(id) {
+    if (!confirm("Eliminar archivo " + id + "?")) return;
+    const res = await fetch("/files/" + id, { method: "DELETE" });
+    const data = await res.json();
+    alert(data.message || data.error);
+    location.reload();
+}
+
+async function renameFile(id) {
+    const name = prompt("Nuevo nombre del archivo:");
+    if (!name) return;
+    const res = await fetch("/files/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: name })
+    });
+    const data = await res.json();
+    alert(data.message || data.error);
+    location.reload();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4">Iniciar sesion</h5>
+
+                {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                {% if query_info %}
+                <div class="alert alert-warning">
+                    <small><strong>Query ejecutada:</strong><br><code>{{ query_info }}</code></small>
+                </div>
+                {% endif %}
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Usuario</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contrasena</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <a href="/register">Crear cuenta</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
