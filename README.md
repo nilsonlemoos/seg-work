@@ -1,6 +1,6 @@
 # seg-work — Aplicación de Gestión de Archivos
 
-Proyecto académico que demuestra el impacto de SecDevOps comparando dos versiones de la misma aplicación web.
+Proyecto académico que demuestra el impacto de SecDevOps comparando versiones de la misma aplicación web, estilo DVWA.
 
 ---
 
@@ -12,14 +12,25 @@ Proyecto académico que demuestra el impacto de SecDevOps comparando dos version
 docker-compose up --build
 ```
 
-Eso es todo. Las dos versiones quedan disponibles en:
+Las tres versiones quedan disponibles en:
 
 | Versión | URL | Descripción |
 |---|---|---|
 | V1 — Insegura | http://localhost:5000 | Con vulnerabilidades intencionales |
 | V2 — Segura | http://localhost:5001 | Corregida con SecDevOps |
+| Unificada | http://localhost:5002 | Selector de modo (seguro/inseguro) en una sola app |
 
 Para detener: `Ctrl+C` y luego `docker-compose down`.
+
+**Ejecución local (sin Docker):**
+
+```bash
+cd unificada
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 app.py
+```
 
 ---
 
@@ -27,7 +38,7 @@ Para detener: `Ctrl+C` y luego `docker-compose down`.
 
 ```
 seg-work/
-├── docker-compose.yml         # Levanta ambas versiones con un comando
+├── docker-compose.yml         # Levanta las tres versiones con un comando
 ├── v1-insecure/               # Versión con vulnerabilidades intencionales
 │   ├── app.py                 # Aplicación monolítica (Flask)
 │   ├── templates/             # HTML: login, registro, dashboard
@@ -43,9 +54,29 @@ seg-work/
 │   ├── run.py
 │   ├── Dockerfile
 │   └── requirements.txt
+├── unificada/                 # Versión unificada (estilo DVWA)
+│   ├── app.py                 # App con toggle seguro/inseguro
+│   ├── templates/
+│   │   ├── base.html          # Layout con selector de modo en navbar
+│   │   ├── login.html
+│   │   ├── register.html
+│   │   └── dashboard.html     # UI cambia según el modo activo
+│   ├── Dockerfile
+│   └── requirements.txt
 └── report/
     └── informe_tecnico.md     # Análisis completo de vulnerabilidades
 ```
+
+---
+
+## Versión Unificada (estilo DVWA)
+
+La carpeta `unificada/` combina ambas versiones en una sola aplicación con un **selector de modo** en el navbar:
+
+- **Modo Inseguro**: SQL Injection, contraseñas en texto plano, sin auth, sin validación de archivos, expone queries en errores
+- **Modo Seguro**: Queries parametrizadas, bcrypt, login_required, whitelist de extensiones, mensajes genéricos
+
+El modo se persiste en la sesión y se puede cambiar desde cualquier página con el botón "Cambiar modo".
 
 ---
 
@@ -63,4 +94,3 @@ seg-work/
 | 8 | Debug mode activo | A05 | ❌ `debug=True` | ✅ `debug=False` |
 
 Ver `report/informe_tecnico.md` para el análisis técnico completo.
-# seg-work

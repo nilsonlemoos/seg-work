@@ -6,10 +6,11 @@ Resumen de todo lo construido en esta sesión por si se pierde el contexto.
 
 ## Qué es el proyecto
 
-Actividad universitaria de seguridad que compara dos versiones de la misma app web:
+Actividad universitaria de seguridad que compara versiones de la misma app web:
 
 - **v1-insecure**: app Flask con 8 vulnerabilidades intencionales (sin SecDevOps)
 - **v2-secure**: misma app corregida aplicando prácticas SecDevOps
+- **unificada**: versión combinada estilo DVWA con selector de modo seguro/inseguro
 
 Funcionalidades: login, registro, subida de archivos, CRUD (GET, POST, PUT, DELETE).
 
@@ -55,6 +56,15 @@ seg-work/
 │           ├── login.html
 │           ├── register.html
 │           └── dashboard.html
+├── unificada/                       ← versión unificada (estilo DVWA)
+│   ├── app.py                       ← app con toggle seguro/inseguro
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── templates/
+│       ├── base.html                ← layout con selector de modo en navbar
+│       ├── login.html
+│       ├── register.html
+│       └── dashboard.html           ← UI cambia según el modo activo
 └── report/
     └── informe_tecnico.md           ← informe completo para entregar
 ```
@@ -81,6 +91,17 @@ DOCKER_HOST=unix:///var/run/docker.sock docker compose down
 **URLs:**
 - V1 insegura → http://localhost:5000
 - V2 segura   → http://localhost:5001
+- Unificada   → http://localhost:5002
+
+**Ejecución local (sin Docker):**
+
+```bash
+cd unificada
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 app.py
+```
 
 ---
 
@@ -90,6 +111,26 @@ No hay usuarios predefinidos. La base de datos arranca vacía. Hay que registrar
 
 - **V1** → http://localhost:5000/register — cualquier usuario y contraseña
 - **V2** → http://localhost:5001/register — contraseña mínimo 8 caracteres
+- **Unificada** → http://localhost:5002/register — cualquier usuario y contraseña
+
+---
+
+## Versión Unificada
+
+La app unificada (`unificada/app.py`) combina v1 y v2 en un solo archivo con un `if is_secure():` en cada endpoint. El modo se persiste en la sesión Flask y se cambia con el botón "Cambiar modo" en el navbar.
+
+**Diferencias por modo:**
+
+| Vulnerabilidad | Modo Inseguro | Modo Seguro |
+|---|---|---|
+| SQL Injection | `+username+` concatenación | `?` parametrizado |
+| Contrasenas | Texto plano | bcrypt (werkzeug) |
+| Auth en endpoints | Sin verificación | `@login_required` (session) |
+| Archivos | Cualquier tipo/tamaño | Whitelist + secure_filename + uuid |
+| Query archivos | Todos los usuarios | Solo los propios (`owner_id`) |
+| Error messages | Expone la query SQL | Genérico |
+| Secret key | Hardcodeada | Variable de entorno |
+| Debug | `debug=True` | `debug=False` |
 
 ---
 
@@ -137,13 +178,13 @@ Y reiniciando: `sudo systemctl restart docker`
 
 ## Git
 
-Repositorio local inicializado en `/home/lemos/Documents/Proyects/seg-work`.  
-Sin remote configurado — para subir a GitHub/GitLab:
+Repositorio: https://github.com/nilsonlemoos/seg-work.git
 
-```bash
-git remote add origin https://github.com/tu-usuario/seg-work.git
-git push -u origin master
-```
+**Ramas:**
+- `main` — código estable
+- `feat/unified-app` — versión unificada DVWA (pendiente de merge)
+
+**Commits sin Co-Authored-By de Claude.**
 
 ---
 
@@ -151,6 +192,7 @@ git push -u origin master
 
 - [x] Código v1 con vulnerabilidades documentadas en el código
 - [x] Código v2 corregido con SecDevOps
+- [x] Código unificado con selector de modo (estilo DVWA)
 - [x] `report/informe_tecnico.md` — informe técnico completo para entregar
 - [x] `README.md` — instrucciones de ejecución para el docente
 - [x] Docker Compose — el docente solo corre un comando
