@@ -164,35 +164,12 @@ La app unificada (`unificada/app.py`) combina v1 y v2 en un solo archivo con un 
 
 ---
 
-## Problema que se resolvió durante la sesión
-
-Docker no tenía acceso a internet para bajar paquetes pip porque el DNS del sistema (`127.0.0.53`) no es accesible desde los contenedores. Se solucionó creando `/etc/docker/daemon.json`:
-
-```json
-{"dns": ["8.8.8.8", "8.8.4.4"]}
-```
-
-Y reiniciando: `sudo systemctl restart docker`
-
----
-
 ## Git
 
 Repositorio: https://github.com/nilsonlemoos/seg-work.git
 
 **Ramas:**
 - `main` — código estable
-- `feat/unified-app` — versión unificada DVWA (pendiente de merge)
-
-**Commits sin Co-Authored-By de Claude.**
+- `feat/unified-app` — versión unificada DVWA
 
 ---
-
-## Entregables listos
-
-- [x] Código v1 con vulnerabilidades documentadas en el código
-- [x] Código v2 corregido con SecDevOps
-- [x] Código unificado con selector de modo (estilo DVWA)
-- [x] `report/informe_tecnico.md` — informe técnico completo para entregar
-- [x] `README.md` — instrucciones de ejecución para el docente
-- [x] Docker Compose — el docente solo corre un comando

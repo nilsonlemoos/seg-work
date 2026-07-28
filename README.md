@@ -1,6 +1,6 @@
 # seg-work — Aplicación de Gestión de Archivos
 
-Proyecto académico que demuestra el impacto de SecDevOps comparando versiones de la misma aplicación web, estilo DVWA.
+Proyecto académico que demuestra el impacto de SecDevOps comparando versiones de la misma aplicación web.
 
 ---
 
@@ -93,4 +93,3 @@ El modo se persiste en la sesión y se puede cambiar desde cualquier página con
 | 7 | Errores con info interna | A05 | ❌ Muestra queries SQL | ✅ Mensajes genéricos |
 | 8 | Debug mode activo | A05 | ❌ `debug=True` | ✅ `debug=False` |
 
-Ver `report/informe_tecnico.md` para el análisis técnico completo.
