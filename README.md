@@ -1,9 +1,10 @@
 # seg-work — Aplicación de Gestión de Archivos
 
-Proyecto académico de seguridad que demuestra el impacto de SecDevOps comparando dos versiones de la misma aplicación web:
+Proyecto académico de seguridad que demuestra el impacto de SecDevOps comparando tres versiones de la misma aplicación web:
 
 - **v1-insecure**: app Flask con vulnerabilidades intencionales (OWASP Top 10)
 - **v2-secure**: misma app fortificada aplicando prácticas de seguridad
+- **unificada**: conmutador de modo seguro/inseguro por sesión (estilo DVWA)
 
 ---
 
@@ -18,14 +19,15 @@ docker compose up --build -d
 > En esta máquina de desarrollo Docker corre como servicio del sistema, por lo que se usa:
 > `DOCKER_HOST=unix:///var/run/docker.sock docker compose up --build -d`
 
-Las dos versiones quedan disponibles en:
+Las tres versiones quedan disponibles en:
 
 | Versión | URL | Descripción |
 |---|---|---|
 | v1 — Insegura | http://localhost:5000 | Vulnerabilidades intencionales (HTTP) |
 | v2 — Segura | https://localhost:8443 | Corregida (HTTPS + CSRF + headers) |
+| v3 — Unificada | https://localhost:8444 | Modo seguro/inseguro conmutable por sesión |
 
-Para v2 el navegador pedirá aceptar el **certificado autofirmado** (Advanced → Continue). Es un certificado generado localmente para desarrollo.
+Para v2 y v3 el navegador pedirá aceptar el **certificado autofirmado** (Advanced → Continue). Es un certificado generado localmente para desarrollo.
 
 Para detener: `docker compose down`.
 
@@ -44,6 +46,13 @@ pip install -r requirements.txt
 bash certs/gen_cert.sh
 python seed.py
 python run.py
+
+# unificada (puerto 8444, requiere certificados)
+cd unificada
+pip install -r requirements.txt
+bash certs/gen_cert.sh
+python seed.py
+python app.py
 ```
 
 ### Credenciales de prueba
