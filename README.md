@@ -1,36 +1,58 @@
 # seg-work — Aplicación de Gestión de Archivos
 
-Proyecto académico que demuestra el impacto de SecDevOps comparando versiones de la misma aplicación web.
+Proyecto académico de seguridad que demuestra el impacto de SecDevOps comparando dos versiones de la misma aplicación web:
+
+- **v1-insecure**: app Flask con vulnerabilidades intencionales (OWASP Top 10)
+- **v2-secure**: misma app fortificada aplicando prácticas de seguridad
 
 ---
 
 ## Cómo ejecutar
 
-**Requisito único: tener [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado.**
+**Requisitos: [Docker](https://docs.docker.com/engine/install/) con el daemon activo.**
 
 ```bash
-docker-compose up --build
+docker compose up --build -d
 ```
 
-Las tres versiones quedan disponibles en:
+> En esta máquina de desarrollo Docker corre como servicio del sistema, por lo que se usa:
+> `DOCKER_HOST=unix:///var/run/docker.sock docker compose up --build -d`
+
+Las dos versiones quedan disponibles en:
 
 | Versión | URL | Descripción |
 |---|---|---|
-| V1 — Insegura | http://localhost:5000 | Con vulnerabilidades intencionales |
-| V2 — Segura | http://localhost:5001 | Corregida con SecDevOps |
-| Unificada | http://localhost:5002 | Selector de modo (seguro/inseguro) en una sola app |
+| v1 — Insegura | http://localhost:5000 | Vulnerabilidades intencionales (HTTP) |
+| v2 — Segura | https://localhost:8443 | Corregida (HTTPS + CSRF + headers) |
 
-Para detener: `Ctrl+C` y luego `docker-compose down`.
+Para v2 el navegador pedirá aceptar el **certificado autofirmado** (Advanced → Continue). Es un certificado generado localmente para desarrollo.
+
+Para detener: `docker compose down`.
 
 **Ejecución local (sin Docker):**
 
 ```bash
-cd unificada
-python3 -m venv venv
-source venv/bin/activate
+# v1 (puerto 5000)
+cd v1-insecure
 pip install -r requirements.txt
-python3 app.py
+python seed.py
+python app.py
+
+# v2 (puerto 8443, requiere certificados)
+cd v2-secure
+pip install -r requirements.txt
+bash certs/gen_cert.sh
+python seed.py
+python run.py
 ```
+
+### Credenciales de prueba
+
+| Usuario | Contraseña |
+|---|---|
+| admin | admin123 |
+| ana | 123456 |
+| pedro | password |
 
 ---
 
@@ -38,58 +60,54 @@ python3 app.py
 
 ```
 seg-work/
-├── docker-compose.yml         # Levanta las tres versiones con un comando
+├── docker-compose.yml         # Levanta v1 y v2 con volúmenes + healthchecks
+├── deploy/                    # Documento de arquitectura de despliegue
+├── sqlmap/                    # Automatización de SQLi con sqlmap (Fase 3)
 ├── v1-insecure/               # Versión con vulnerabilidades intencionales
 │   ├── app.py                 # Aplicación monolítica (Flask)
+│   ├── seed.py                # Usuarios de prueba en texto plano
+│   ├── certs/ (solo en v2)
 │   ├── templates/             # HTML: login, registro, dashboard
-│   ├── Dockerfile
-│   └── requirements.txt
+│   └── Dockerfile
 ├── v2-secure/                 # Versión corregida con SecDevOps
 │   ├── app/
-│   │   ├── auth.py            # Módulo de autenticación
-│   │   ├── files.py           # Módulo CRUD de archivos
-│   │   ├── config.py          # Configuración segura
+│   │   ├── auth.py            # Autenticación (bcrypt)
+│   │   ├── files.py           # CRUD de archivos
+│   │   ├── config.py          # Configuración segura + TLS
 │   │   ├── database.py        # Acceso a base de datos
-│   │   └── templates/         # HTML: login, registro, dashboard
-│   ├── run.py
-│   ├── Dockerfile
-│   └── requirements.txt
-├── unificada/                 # Versión unificada (estilo DVWA)
-│   ├── app.py                 # App con toggle seguro/inseguro
-│   ├── templates/
-│   │   ├── base.html          # Layout con selector de modo en navbar
-│   │   ├── login.html
-│   │   ├── register.html
-│   │   └── dashboard.html     # UI cambia según el modo activo
-│   ├── Dockerfile
-│   └── requirements.txt
-└── report/
-    └── informe_tecnico.md     # Análisis completo de vulnerabilidades
+│   │   └── templates/
+│   ├── certs/                 # gen_cert.sh + certificados locales
+│   ├── run.py                 # HTTPS en puerto 8443
+│   ├── seed.py                # Usuarios de prueba con bcrypt
+│   └── Dockerfile
+└── mapeo_owasp.md             # Vulnerabilidades vs OWASP Top 10 2021
 ```
 
 ---
 
-## Versión Unificada (estilo DVWA)
-
-La carpeta `unificada/` combina ambas versiones en una sola aplicación con un **selector de modo** en el navbar:
-
-- **Modo Inseguro**: SQL Injection, contraseñas en texto plano, sin auth, sin validación de archivos, expone queries en errores
-- **Modo Seguro**: Queries parametrizadas, bcrypt, login_required, whitelist de extensiones, mensajes genéricos
-
-El modo se persiste en la sesión y se puede cambiar desde cualquier página con el botón "Cambiar modo".
-
----
-
-## Vulnerabilidades demostradas en V1 vs soluciones en V2
+## Vulnerabilidades en V1 vs soluciones en V2
 
 | # | Vulnerabilidad | OWASP | V1 | V2 |
 |---|---|---|---|---|
 | 1 | SQL Injection | A03 | ❌ Concatenación directa | ✅ Queries parametrizadas |
-| 2 | Contraseñas en texto plano | A02 | ❌ Sin hashing | ✅ bcrypt (Werkzeug) |
-| 3 | Archivos sin validación | A04 | ❌ Cualquier tipo y tamaño | ✅ Whitelist + límite 5 MB |
-| 4 | Endpoints sin autenticación | A01 | ❌ API abierta | ✅ Decorador `@login_required` |
-| 5 | Acceso a archivos de otros usuarios | A01 | ❌ Sin filtro por usuario | ✅ Filtro por `owner_id` |
+| 2 | Command Injection (RCE) | A03 | ❌ `os.popen()` en `/server_status` | ✅ Endpoint inexistente |
+| 3 | XSS reflejado y almacenado | A03 | ❌ `\|safe` en login y dashboard | ✅ Escape de plantillas |
+| 4 | CSRF | A07 | ❌ Sin tokens | ✅ Flask-WTF + Referer estricto |
+| 5 | Contraseñas en texto plano | A02 | ❌ Sin hashing | ✅ bcrypt |
 | 6 | Secret key hardcodeada | A02 | ❌ `"admin123"` en código | ✅ Variable de entorno |
-| 7 | Errores con info interna | A05 | ❌ Muestra queries SQL | ✅ Mensajes genéricos |
-| 8 | Debug mode activo | A05 | ❌ `debug=True` | ✅ `debug=False` |
+| 7 | Archivos sin validación | A04 | ❌ Cualquier tipo y tamaño | ✅ Whitelist + límite 5 MB |
+| 8 | Endpoints sin autenticación | A01 | ❌ API abierta | ✅ `@login_required` |
+| 9 | Acceso a archivos de otros usuarios | A01 | ❌ Sin filtro por usuario | ✅ Filtro por `owner_id` |
+| 10 | Errores con info interna | A05 | ❌ Muestra queries SQL | ✅ Mensajes genéricos |
+| 11 | Debug mode activo | A05 | ❌ `debug=True` | ✅ `debug=False` |
+| 12 | Sin TLS | — | ❌ HTTP plano | ✅ HTTPS 8443 + HSTS |
 
+---
+
+## Documentación adicional
+
+| Documento | Contenido |
+|---|---|
+| `deploy/ARQUITECTURA.md` | Topología de red, puertos, zonas de confianza, escenarios de despliegue |
+| `sqlmap/resultados_sqlmap.md` | Explotación automatizada del SQLi del login |
+| `mapeo_owasp.md` | Mapeo de las vulnerabilidades contra OWASP Top 10 2021 |
