@@ -18,8 +18,8 @@
             {% endwith %}
 
             <form method="POST">
-                <!-- CSRF token generado por Flask (sesión firmada) -->
-                <input type="hidden" name="csrf_token" value="{{ session.get('_id', '') }}">
+                <!-- CSRF token real generado por Flask-WTF (verificado en backend) -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">
                     <label class="form-label">Usuario</label>
                     <input type="text" name="username" class="form-control" required minlength="3" maxlength="50">
