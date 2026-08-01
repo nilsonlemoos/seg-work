@@ -11,6 +11,31 @@ app.secret_key = "admin123"
 UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+# ─── SERVER STATUS (RCE) ─────────────────────────────────────────────────────
+
+@app.route("/server_status", methods=["GET", "POST"])
+def server_status():
+    """VULNERABILIDAD CRITICA: RCE (OWASP A03:2021 - Injection).
+
+    El input del usuario se pasa DIRECTAMENTE a os.popen() sin ninguna
+    validacion ni sanitizacion. Permite ejecutar comandos arbitrarios en
+    el sistema operativo del servidor (ej: `; whoami`, `| cat /etc/passwd`).
+    """
+    output = ""
+    command = ""
+
+    if request.method == "POST":
+        command = request.form.get("command", "")
+    elif request.method == "GET":
+        # Tambien acepta parametro por query string para uso con curl/sqlmap
+        command = request.args.get("command", "")
+
+    if command:
+        # VULNERABILIDAD: RCE puro - el input es el comando que se ejecuta
+        output = os.popen(command).read()
+
+    return render_template("server_status.html", output=output, command=command)
+
 # VULNERABILIDAD: Base de datos creada sin ningún control
 def get_db():
     conn = sqlite3.connect("database.db")
@@ -46,6 +71,9 @@ def index():
 def login():
     error = None
     if request.method == "POST":
+        # VULNERABILIDAD: CSRF (OWASP A07:2021) — no existe token anti-CSRF.
+        # Un atacante puede forzar un login como su propio usuario mediante
+        # un formulario externo (cross-site request).
         username = request.form["username"]
         password = request.form["password"]
 
@@ -67,6 +95,7 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        # VULNERABILIDAD: CSRF — registro sin token anti-CSRF.
         username = request.form["username"]
         password = request.form["password"]
 
@@ -81,6 +110,8 @@ def register():
 
 @app.route("/logout")
 def logout():
+    # VULNERABILIDAD: CSRF — logout por GET sin token. Un <img> externo
+    # con src="/logout" cierra la sesión de la víctima (denegación de servicio).
     session.clear()
     return redirect(url_for("login"))
 
@@ -106,6 +137,8 @@ def list_files():
 
 @app.route("/files/upload", methods=["POST"])
 def upload_file():
+    # VULNERABILIDAD: CSRF — subida de archivos sin token. Un atacante puede
+    # inducir a la víctima a subir un archivo malicioso desde un sitio externo.
     # VULNERABILIDAD: sin autenticación requerida
     # VULNERABILIDAD: sin validación de tipo de archivo
     # VULNERABILIDAD: sin límite de tamaño

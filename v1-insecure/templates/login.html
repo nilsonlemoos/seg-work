@@ -12,10 +12,13 @@
             <h4 class="mb-3 text-danger">Login <small class="text-muted fs-6">(v1 - inseguro)</small></h4>
 
             {% if error %}
-            <!-- VULNERABILIDAD: se muestra la query SQL al usuario -->
-            <div class="alert alert-danger small">{{ error }}</div>
+            <!-- VULNERABILIDAD: se muestra la query SQL al usuario
+                 (info disclosure) y se renderiza con |safe →
+                 Reflected XSS si el username contiene <script>. -->
+            <div class="alert alert-danger small">{{ error | safe }}</div>
             {% endif %}
 
+            <!-- VULNERABILIDAD: CSRF - formulario sin token anti-CSRF -->
             <form method="POST">
                 <div class="mb-3">
                     <label class="form-label">Usuario</label>
