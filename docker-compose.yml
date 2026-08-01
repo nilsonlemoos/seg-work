@@ -8,7 +8,7 @@ services:
   v2-secure:
     build: ./v2-secure
     ports:
-      - "5001:5001"
+      - "8443:8443"
     environment:
       - SECRET_KEY=clave-segura-generada-para-demo
     container_name: seg-v2-secure

@@ -11,3 +11,6 @@ report/
 # (el entregable exige adjuntar la DB con los registros de prueba).
 !v1-insecure/database.db
 !v2-secure/database.db
+
+# Certificados TLS autogenerados (nunca versionar llaves privadas)
+v2-secure/certs/*.pem
