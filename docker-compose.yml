@@ -1,22 +1,53 @@
 services:
   v1-insecure:
     build: ./v1-insecure
+    container_name: seg-v1-insecure
+    restart: unless-stopped
+    networks:
+      - seg-net
     ports:
       - "5000:5000"
-    container_name: seg-v1-insecure
+    environment:
+      - DB_PATH=/data/database.db
+      - UPLOAD_FOLDER=/app/uploads
+    volumes:
+      - v1-db:/data
+      - v1-uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:5000/login')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   v2-secure:
     build: ./v2-secure
+    container_name: seg-v2-secure
+    restart: unless-stopped
+    networks:
+      - seg-net
     ports:
       - "8443:8443"
     environment:
       - SECRET_KEY=clave-segura-generada-para-demo
-    container_name: seg-v2-secure
+      - DATABASE=/data/database.db
+      - UPLOAD_FOLDER=/app/uploads
+    volumes:
+      - v2-db:/data
+      - v2-uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import ssl,urllib.request;c=ssl._create_unverified_context();urllib.request.urlopen('https://localhost:8443/login',context=c)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
-  unificada:
-    build: ./unificada
-    ports:
-      - "5002:5002"
-    environment:
-      - SECRET_KEY=clave-demo-unificada
-    container_name: seg-unificada
+networks:
+  seg-net:
+    driver: bridge
+
+volumes:
+  v1-db:
+  v1-uploads:
+  v2-db:
+  v2-uploads:

@@ -10,7 +10,9 @@ Idempotente: puede ejecutarse N veces sin duplicar registros.
 import os
 import sqlite3
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
+DB_PATH = os.environ.get(
+    "DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
+)
 
 USERS = [
     ("admin", "admin123"),
