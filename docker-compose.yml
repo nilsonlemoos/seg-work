@@ -42,6 +42,28 @@ services:
       retries: 5
       start_period: 10s
 
+  unificada:
+    build: ./unificada
+    container_name: seg-unificada
+    restart: unless-stopped
+    networks:
+      - seg-net
+    ports:
+      - "8444:8444"
+    environment:
+      - SECRET_KEY=clave-segura-generada-para-demo
+      - DATABASE=/data/database.db
+      - UPLOAD_FOLDER=/app/uploads
+    volumes:
+      - unificada-db:/data
+      - unificada-uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import ssl,urllib.request;c=ssl._create_unverified_context();urllib.request.urlopen('https://localhost:8444/login',context=c)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 networks:
   seg-net:
     driver: bridge
@@ -51,3 +73,5 @@ volumes:
   v1-uploads:
   v2-db:
   v2-uploads:
+  unificada-db:
+  unificada-uploads:
