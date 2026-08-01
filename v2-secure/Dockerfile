@@ -14,4 +14,5 @@ RUN mkdir -p uploads
 RUN bash certs/gen_cert.sh
 
 EXPOSE 8443
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["python", "run.py"]

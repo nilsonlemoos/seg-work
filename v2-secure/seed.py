@@ -12,9 +12,9 @@ import sqlite3
 
 import bcrypt
 
-# Misma ruta que app/config.py
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "database.db"
+# Misma ruta que app/config.py (configurable para volumen Docker)
+DB_PATH = os.environ.get(
+    "DATABASE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "database.db")
 )
 
 USERS = [

@@ -10,12 +10,12 @@ class Config:
     # Cargado desde variable de entorno, nunca hardcodeado
     SECRET_KEY = os.environ.get("SECRET_KEY", os.urandom(32))
 
-    UPLOAD_FOLDER = os.path.join(_BASE, "uploads")
+    UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER", os.path.join(_BASE, "uploads"))
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB máximo
 
     ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif", "txt", "docx"}
 
-    DATABASE = os.path.join(_BASE, "database.db")
+    DATABASE = os.environ.get("DATABASE", os.path.join(_BASE, "database.db"))
 
     # ── Seguridad de sesión / cookies ───────────────────────────────────────
     SESSION_COOKIE_HTTPONLY = True     # no accesible desde JS (mitiga XSS)
