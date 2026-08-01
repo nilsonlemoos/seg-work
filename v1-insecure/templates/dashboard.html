@@ -12,13 +12,17 @@
             Dashboard <small class="text-muted fs-6">(v1 - inseguro)</small>
             {% if user %} — Hola, <strong>{{ user }}</strong>{% endif %}
         </h4>
-        <a href="/logout" class="btn btn-outline-secondary btn-sm">Cerrar sesión</a>
+        <div>
+            <a href="/server_status" class="btn btn-outline-danger btn-sm">Server Status (RCE)</a>
+            <a href="/logout" class="btn btn-outline-secondary btn-sm">Cerrar sesión</a>
+        </div>
     </div>
 
     <!-- VULNERABILIDAD: se muestran archivos de TODOS los usuarios -->
     <div class="card mb-4">
         <div class="card-header">Subir archivo (sin validación)</div>
         <div class="card-body">
+            <!-- VULNERABILIDAD: CSRF - subida de archivos sin token anti-CSRF -->
             <form id="uploadForm" enctype="multipart/form-data">
                 <div class="input-group">
                     <input type="file" name="file" id="fileInput" class="form-control">
@@ -46,7 +50,10 @@
                 {% for f in files %}
                 <tr>
                     <td>{{ f.id }}</td>
-                    <td>{{ f.filename }}</td>
+                    <!-- VULNERABILIDAD: Stored XSS - el nombre del archivo se
+                         renderiza con |safe, sin escapar. Si el filename contiene
+                         <script>, se ejecuta al cargar el dashboard. -->
+                    <td>{{ f.filename | safe }}</td>
                     <td>{{ f.owner }}</td>
                     <td>
                         <a href="/files/{{ f.id }}" class="btn btn-sm btn-outline-primary">Descargar</a>

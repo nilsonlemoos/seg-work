@@ -1,5 +1,5 @@
 from flask import Blueprint, request, session, redirect, url_for, render_template, flash
-from werkzeug.security import generate_password_hash, check_password_hash
+import bcrypt
 from .database import get_db
 import functools
 import time
@@ -7,6 +7,19 @@ import time
 auth_bp = Blueprint("auth", __name__)
 
 login_attempts = {}
+
+
+def hash_password(password: str) -> str:
+    """Hashing criptográfico seguro con bcrypt."""
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def check_password(password: str, password_hash: str) -> bool:
+    """Verificación de contraseña contra hash bcrypt."""
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    except ValueError:
+        return False
 
 def login_required(view):
     @functools.wraps(view)
@@ -45,7 +58,8 @@ def login():
             "SELECT * FROM users WHERE username = ?", (username,)
         ).fetchone()
 
-        if user is None or not check_password_hash(user["password_hash"], password):
+        # Mensaje genérico — no revela si el usuario existe
+        if user is None or not check_password(password, user["password_hash"]):
             # Registrar intento fallido
             if attempts["count"] == 0:
                 login_attempts[ip] = {"count": 1, "first": now}
@@ -83,10 +97,10 @@ def register():
             flash("El usuario ya existe.", "warning")
             return render_template("register.html")
 
-        # Contraseña hasheada con bcrypt via werkzeug
+        # Contraseña hasheada con bcrypt
         db.execute(
             "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-            (username, generate_password_hash(password)),
+            (username, hash_password(password)),
         )
         db.commit()
         flash("Registro exitoso. Inicia sesión.", "success")

@@ -6,3 +6,8 @@ uploads/
 venv/
 .venv/
 report/
+
+# Laboratorio: las bases de datos de las versiones v1 y v2 SÍ se versionan
+# (el entregable exige adjuntar la DB con los registros de prueba).
+!v1-insecure/database.db
+!v2-secure/database.db
