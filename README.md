@@ -60,13 +60,11 @@ python run.py
 
 ```
 seg-work/
-├── docker-compose.yml         # Levanta v1 y v2 con volúmenes + healthchecks
-├── deploy/                    # Documento de arquitectura de despliegue
+├── docker-compose.yml         # Levanta v1, v2 y unificada con volúmenes + healthchecks
 ├── sqlmap/                    # Automatización de SQLi con sqlmap (Fase 3)
 ├── v1-insecure/               # Versión con vulnerabilidades intencionales
 │   ├── app.py                 # Aplicación monolítica (Flask)
 │   ├── seed.py                # Usuarios de prueba en texto plano
-│   ├── certs/ (solo en v2)
 │   ├── templates/             # HTML: login, registro, dashboard
 │   └── Dockerfile
 ├── v2-secure/                 # Versión corregida con SecDevOps
@@ -80,7 +78,11 @@ seg-work/
 │   ├── run.py                 # HTTPS en puerto 8443
 │   ├── seed.py                # Usuarios de prueba con bcrypt
 │   └── Dockerfile
-└── mapeo_owasp.md             # Vulnerabilidades vs OWASP Top 10 2021
+└── unificada/                 # Versión unificada (estilo DVWA, puerto 8444)
+    ├── app.py                 # Conmutador de modo seguro/inseguro por sesión
+    ├── seed.py                # Usuarios con texto plano + bcrypt
+    ├── templates/             # HTML con badge de modo y CSRF condicional
+    └── Dockerfile
 ```
 
 ---
@@ -108,6 +110,5 @@ seg-work/
 
 | Documento | Contenido |
 |---|---|
-| `deploy/ARQUITECTURA.md` | Topología de red, puertos, zonas de confianza, escenarios de despliegue |
 | `sqlmap/resultados_sqlmap.md` | Explotación automatizada del SQLi del login |
-| `mapeo_owasp.md` | Mapeo de las vulnerabilidades contra OWASP Top 10 2021 |
+| `docs/GUIA_ENTORNO_Y_TRAFICO.md` | Guía de despliegue, evidencias de V1/V2/V3, análisis de tráfico (local, no versionado) |

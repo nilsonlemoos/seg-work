@@ -42,20 +42,18 @@ Funcionalidades: login, registro, subida de archivos, CRUD (GET, POST, PUT, DELE
 
 ```
 seg-work/
-├── docker-compose.yml          # v1 + v2 con volúmenes, red seg-net, healthchecks
+├── docker-compose.yml          # v1 + v2 + unificada, red seg-net, healthchecks
 ├── .gitignore
 ├── README.md                   ← instrucciones para el docente
 ├── NOTAS_SESION.md             ← este archivo
 ├── GUIA_PRUEBAS.md             ← local only (no se commitea)
-├── mapeo_owasp.md              ← 12 vulns vs OWASP Top 10 2021
-├── deploy/
-│   └── ARQUITECTURA.md         ← topología, puertos, zonas, escenarios
 ├── sqlmap/
 │   ├── automate_sqlmap.sh      ← detección + enumeración + dump
 │   ├── resultados_sqlmap.md
 │   └── output/                 ← logs de ejecución
-├── docs/
-│   └── DOCUMENTACION.md        ← local only (no se commitea)
+├── docs/                       ← local only (no se commitea)
+│   ├── DOCUMENTACION.md        ← documento maestro de la Fase 5
+│   └── GUIA_ENTORNO_Y_TRAFICO.md ← informe: guía + evidencias + análisis de tráfico
 ├── v1-insecure/
 │   ├── app.py                  ← monolítico, vulnerable
 │   ├── seed.py                 ← usuarios texto plano (idempotente)
@@ -63,21 +61,29 @@ seg-work/
 │   ├── Dockerfile
 │   ├── requirements.txt        ← flask==3.0.3
 │   └── templates/
-└── v2-secure/
-    ├── run.py                  ← HTTPS puerto 8443
-    ├── seed.py                 ← usuarios con bcrypt
+├── v2-secure/
+│   ├── run.py                  ← HTTPS puerto 8443
+│   ├── seed.py                 ← usuarios con bcrypt
+│   ├── docker-entrypoint.sh
+│   ├── certs/                  ← gen_cert.sh (pems ignorados por git)
+│   ├── Dockerfile
+│   ├── requirements.txt        ← flask + dotenv + bcrypt + flask-wtf
+│   ├── .env.example
+│   └── app/
+│       ├── __init__.py         ← factory + CSRFProtect + security headers
+│       ├── auth.py             ← login/register/logout (bcrypt)
+│       ├── files.py            ← CRUD de archivos (owner_id)
+│       ├── config.py           ← config segura + rutas TLS
+│       ├── database.py
+│       └── templates/
+└── unificada/
+    ├── app.py                  ← conmutador de modo seguro/inseguro (HTTPS 8444)
+    ├── seed.py                 ← usuarios texto plano + bcrypt
     ├── docker-entrypoint.sh
     ├── certs/                  ← gen_cert.sh (pems ignorados por git)
     ├── Dockerfile
-    ├── requirements.txt        ← flask + dotenv + bcrypt + flask-wtf
-    ├── .env.example
-    └── app/
-        ├── __init__.py         ← factory + CSRFProtect + security headers
-        ├── auth.py             ← login/register/logout (bcrypt)
-        ├── files.py            ← CRUD de archivos (owner_id)
-        ├── config.py           ← config segura + rutas TLS
-        ├── database.py
-        └── templates/
+    ├── requirements.txt        ← flask + bcrypt + flask-wtf
+    └── templates/
 ```
 
 ---
@@ -106,18 +112,19 @@ DOCKER_HOST=unix:///var/run/docker.sock docker compose logs -f v1-insecure
 > `docker compose up --build`. También se puede fijar: `docker context use default`.
 
 **URLs:**
-- v1 insegura → http://localhost:5000 (HTTP)
-- v2 segura   → https://localhost:8443 (HTTPS, cert autofirmado)
+- v1 insegura   → http://localhost:5000 (HTTP)
+- v2 segura     → https://localhost:8443 (HTTPS, cert autofirmado)
+- unificada     → https://localhost:8444 (HTTPS, conmutador de modo por sesión)
 
 **Ejecución local (sin Docker):** ver README.md.
 
-**Credenciales sembradas (ambas versiones):** `admin/admin123`, `ana/123456`, `pedro/password`.
+**Credenciales sembradas (las tres versiones):** `admin/admin123`, `ana/123456`, `pedro/password`.
 
 ---
 
 ## Docker (Fase 4)
 
-- Volúmenes nombrados: `v1-db`, `v2-db`, `v1-uploads`, `v2-uploads` (persistencia en `/data`)
+- Volúmenes nombrados: `v1-db`, `v2-db`, `unificada-db`, `v1-uploads`, `v2-uploads`, `unificada-uploads`
 - Red bridge interna `seg-net`
 - Entrypoint `docker-entrypoint.sh`: siembra la BD (idempotente) y arranca la app
 - Healthcheck con `urllib` (imágenes slim no traen `curl`)
@@ -143,7 +150,8 @@ DOCKER_HOST=unix:///var/run/docker.sock docker compose logs -f v1-insecure
 | 11 | Errores con info interna | Error de login muestra la query SQL |
 | 12 | Debug mode activo | `app.run(debug=True, host="0.0.0.0")` |
 
-Mapeo completo a OWASP Top 10 2021 en `mapeo_owasp.md`.
+Mapeo completo a OWASP Top 10 2021 y arquitectura en el informe local
+`docs/GUIA_ENTORNO_Y_TRAFICO.md` (no versionado).
 
 ---
 
