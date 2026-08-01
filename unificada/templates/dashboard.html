@@ -12,10 +12,16 @@
             {% if user %} &mdash; Hola, <strong>{{ user }}</strong>{% endif %}
         </small>
     </h4>
+    {% if mode == 'inseguro' %}
+    <a href="/server_status" class="btn btn-outline-danger btn-sm">Server Status (RCE)</a>
+    {% endif %}
 </div>
 
 <div class="card mb-4">
-    <div class="card-header">Subir archivo</div>
+    <div class="card-header">
+        Subir archivo
+        {% if mode == 'inseguro' %}<span class="text-danger"> (sin validación)</span>{% endif %}
+    </div>
     <div class="card-body">
         <form id="uploadForm" enctype="multipart/form-data">
             <div class="input-group">
@@ -25,9 +31,9 @@
             </div>
             <small class="text-muted">
                 {% if mode == 'seguro' %}
-                    Tipos permitidos: PDF, PNG, JPG, GIF, TXT, DOCX. Maximo 5 MB.
+                    Tipos permitidos: PDF, PNG, JPG, GIF, TXT, DOCX. Máximo 5 MB.
                 {% else %}
-                    Se acepta cualquier tipo de archivo y tamano.
+                    Se acepta cualquier tipo de archivo y tamaño.
                 {% endif %}
             </small>
         </form>
@@ -53,7 +59,12 @@
             {% for f in files %}
             <tr>
                 <td>{{ f.id }}</td>
-                <td>{{ f.original_name }}</td>
+                {# VULNERABILIDAD (modo inseguro): Stored XSS — el nombre del
+                   archivo se renderiza con |safe. Si el filename contiene
+                   <script>, se ejecuta al cargar el dashboard. #}
+                <td>
+                    {% if mode == 'seguro' %}{{ f.original_name }}{% else %}{{ f.original_name | safe }}{% endif %}
+                </td>
                 {% if mode == 'inseguro' %}<td>{{ f.owner_id }}</td>{% endif %}
                 <td>
                     <a href="/files/{{ f.id }}" class="btn btn-sm btn-outline-primary">Descargar</a>
@@ -76,6 +87,12 @@
 
 {% block scripts %}
 <script>
+function csrfHeaders() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (!meta) return {};              // modo inseguro: sin token
+    return { "X-CSRFToken": meta.content };
+}
+
 document.getElementById("uploadForm").addEventListener("submit", async function(e) {
     e.preventDefault();
     const fileInput = document.getElementById("fileInput");
@@ -86,7 +103,7 @@ document.getElementById("uploadForm").addEventListener("submit", async function(
     }
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
-    const res = await fetch("/files/upload", { method: "POST", body: formData });
+    const res = await fetch("/files/upload", { method: "POST", body: formData, headers: csrfHeaders() });
     const data = await res.json();
     const cls = res.ok ? "success" : "danger";
     document.getElementById("uploadMsg").innerHTML =
@@ -96,7 +113,7 @@ document.getElementById("uploadForm").addEventListener("submit", async function(
 
 async function deleteFile(id) {
     if (!confirm("Eliminar archivo " + id + "?")) return;
-    const res = await fetch("/files/" + id, { method: "DELETE" });
+    const res = await fetch("/files/" + id, { method: "DELETE", headers: csrfHeaders() });
     const data = await res.json();
     alert(data.message || data.error);
     location.reload();
@@ -107,7 +124,7 @@ async function renameFile(id) {
     if (!name) return;
     const res = await fetch("/files/" + id, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: Object.assign({ "Content-Type": "application/json" }, csrfHeaders()),
         body: JSON.stringify({ filename: name })
     });
     const data = await res.json();

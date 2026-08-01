@@ -7,10 +7,12 @@ venv/
 .venv/
 report/
 
-# Laboratorio: las bases de datos de las versiones v1 y v2 SÍ se versionan
-# (el entregable exige adjuntar la DB con los registros de prueba).
+# Laboratorio: las bases de datos de las versiones v1, v2 y unificada SÍ se
+# versionan (el entregable exige adjuntar la DB con los registros de prueba).
 !v1-insecure/database.db
 !v2-secure/database.db
+!unificada/database.db
 
 # Certificados TLS autogenerados (nunca versionar llaves privadas)
 v2-secure/certs/*.pem
+unificada/certs/*.pem

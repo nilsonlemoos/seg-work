@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Server Status{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h4 class="mb-3 text-danger">Diagnóstico del servidor
+                    <small class="text-muted fs-6">(modo inseguro — RCE)</small>
+                </h4>
+                <p class="text-muted small">
+                    Herramienta de administración que ejecuta comandos en el servidor.
+                    <!-- VULNERABILIDAD: no hay validación del comando (RCE) -->
+                </p>
+
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="input-group mb-3">
+                        <input type="text" name="command" class="form-control"
+                               placeholder="Ej: whoami  |  cat /etc/passwd  |  id"
+                               value="{{ command }}">
+                        <button type="submit" class="btn btn-danger">Ejecutar</button>
+                    </div>
+                </form>
+
+                {% if output %}
+                <div class="card bg-dark text-light">
+                    <div class="card-header">Salida del comando</div>
+                    <div class="card-body">
+                        <pre class="mb-0"><code>{{ output }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                <hr>
+                <a href="/dashboard" class="btn btn-outline-primary btn-sm">Ir al dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
